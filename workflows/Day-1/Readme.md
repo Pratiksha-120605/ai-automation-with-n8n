@@ -8,11 +8,17 @@
 - How HTTP Request node works
 - How to connect n8n with AI API
 - Handling rate limit errors (429)
+- How memory improves AI responses
+- Difference between stateless and stateful workflows
+- Tool-based AI execution inside n8n
 
 ### 🔹 Workflow Built
 Manual Trigger  
 → HTTP Request (AI API call)  
 → Response Output  
+→ Added memory to store conversation history
+→ Implemented tool integration (MasterStack)
+→ Converted simple AI response workflow into contextual chatbot
 
 ### 🔹 Key Concepts Practiced
 - API integration
@@ -46,6 +52,9 @@ Successfully executed first AI-powered workflow in n8n.
 
 ### Added simple memory to store history
 <img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/84227fec-a24e-4b61-9092-7d57aef7bf34" />
+
+### Added MasterStack tool
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/4bda1de6-1f62-4357-b02c-f6d7f068edaa" />
 
 
 
