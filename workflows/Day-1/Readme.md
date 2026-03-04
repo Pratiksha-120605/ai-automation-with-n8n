@@ -36,11 +36,16 @@ Successfully executed first AI-powered workflow in n8n.
 - n8n
 - OpenRouter API
 - GitHub
+- n8n simple memory
 
 ---
 
 ### Snapshot 
+### Added only LLM Model
 ![Image](https://github.com/user-attachments/assets/4a3626f7-5de9-4c17-b0f6-9ae7d788d5ec)
+
+### Added simple memory to store history
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/84227fec-a24e-4b61-9092-7d57aef7bf34" />
 
 
 
