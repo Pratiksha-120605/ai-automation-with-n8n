@@ -1,0 +1,185 @@
+{
+  "name": "email-draft-automation",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3a7298b2-5c3a-49d0-9fd4-903f7b9cc72c",
+      "name": "When chat message received",
+      "webhookId": "799b63f9-a096-4159-9454-57aeee8ab947"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful email assistant. When the user asks you to draft an email, you MUST use the 'Create a draft in Gmail' tool. Always use the available tools to perform actions - never just describe what you would do."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "71d90ea1-e1c3-437d-8ffe-6a30df4a4b14",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        224
+      ],
+      "id": "dfae6d12-fd52-459b-829e-33b816d55cd8",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "0srB08fwXmEYSvgN",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        224
+      ],
+      "id": "7a773d3e-767c-41d4-81c9-ea1d6c8dd9d4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        192
+      ],
+      "id": "b59b6c4a-86e1-43de-bfb8-94ce5813b9e0",
+      "name": "Get recent emails from Gmail",
+      "webhookId": "13c85029-d0ec-487b-b1bd-53577d593b5c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wliWW03vEmfzON23",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "sendTo": "pratiksha.22310039@viit.ac.in"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        240
+      ],
+      "id": "3192e6f0-d0e2-4f3e-b3c4-9c5857f30068",
+      "name": "Create a draft in Gmail",
+      "webhookId": "0f98301c-82ac-4bba-8ad0-05e1ff341b96",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wliWW03vEmfzON23",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get recent emails from Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d952a71d-7c92-4784-ae21-54d251fade89",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f3b12307b92d3273d1091e5180634d4fefd14377ec0ffb810b2025fef5946a9"
+  },
+  "id": "ZKTRLQ36m8XKaH12",
+  "tags": []
+}
