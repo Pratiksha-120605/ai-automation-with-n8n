@@ -1,0 +1,538 @@
+{
+  "name": "Linkdein_code_generation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        112
+      ],
+      "id": "6c2c69d8-f2c4-4597-a751-dee87bab67f5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://huggingface.co/papers/trending",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User_Agent",
+              "value": "version1.1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        112
+      ],
+      "id": "edc0daae-e55d-4149-9c72-bff617415203",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "article h3 a ",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        112
+      ],
+      "id": "17f6a75e-98a8-4021-9aed-68aa5a9e53fc",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        896,
+        112
+      ],
+      "id": "17a9350c-29de-4776-8b4d-edeaa2a5ef20",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "title",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        112
+      ],
+      "id": "cc49a73f-21d6-461b-91e0-b23bc8a1715f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        112
+      ],
+      "id": "4755f6bf-e108-4cb6-9d31-d1db559b32ce",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        112
+      ],
+      "id": "70f3bdcd-78c3-4073-bbae-d9d0414a6c83",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "=https://huggingface.co/papers/trending?q={{$json.title}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User_Agent",
+              "value": "v1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1568,
+        192
+      ],
+      "id": "cfa495c5-4ddc-43a3-8d56-6dec44153db1",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "des",
+              "cssSelector": "p.text-gray-500"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        192
+      ],
+      "id": "8582140c-c623-4a26-bf09-a52f698bebda",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2016,
+        112
+      ],
+      "id": "c9bed7a1-0a59-497b-9cdf-3f4429463508",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2688,
+        -16
+      ],
+      "id": "5283468c-07fa-4e9b-b46c-4f82496c52d6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = {};\n\nfor (const item of $input.all()) {\n  Object.assign(result, item.json);\n}\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        -16
+      ],
+      "id": "662aeab0-e3a2-4e07-b3cd-fec06a5961bf",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "47eb29ac-a321-4066-9d2a-5a53e82baa22",
+              "name": "=chatInput",
+              "value": "=Your job is to analyse raw topic lists extracted from research papers, technology websites, Product Hunt, Y Combinator launches, engineering blogs, and similar sources. Your task is to filter, rank, and transform these raw topics into the most interesting and strategically valuable discussion ideas for a very specific audience: technology decision-makers in product companies.  The typical reader is a CTO, founder, product head, or engineering manager working in a product or SaaS company with roughly 20–500 employees and 15–200 engineers, usually in Seed to Series B stage companies primarily in the US and Europe (with some India SaaS). These leaders care about engineering execution, delivery speed, architecture decisions, scaling systems, AI adoption, developer productivity, and the operational realities of building software products.  The purpose of the output is to help a CTO from a technology services company create credible LinkedIn thought-leadership topics that demonstrate real engineering insight. The topics must avoid generic hype and instead focus on practical implications for teams building and shipping products.  When analysing the provided input, you should:  1. Understand the underlying technical themes. 2. Evaluate which topics matter most to the described audience. 3. Identify what is genuinely important, emerging, controversial, or strategically useful for engineering leaders. 4. Select the most valuable topics worth discussing publicly.  Ranking criteria should emphasize:  * Relevance to engineering leadership and product delivery * Practical impact on teams building software * Emerging technology shifts that could affect architecture or workflow * Non-obvious insights rather than surface-level news * Potential to demonstrate expertise and real experience  Reject shallow trends, marketing announcements, or consumer-level news unless they create meaningful implications for engineering teams.  For every selected topic, produce:  * A short clear topic title * Why this matters to CTOs or engineering leaders * A specific angle that demonstrates practical engineering insight * Optional tension or debate that could spark thoughtful discussion  The tone should sound like a sharp engineering strategist, not a content marketer. Avoid generic AI-style phrases, motivational language, or buzzword-heavy explanations. Favor concrete reasoning about architecture, delivery, scaling systems, developer productivity, and technical trade-offs.  If the raw input is messy (scraped notes, mixed headlines, or partial text), infer the underlying themes and still extract meaningful topics.  If the list contains many similar items, cluster them and surface the strongest representative idea.  Default output length: 5–10 curated topics with concise but thoughtful explanations.  Now analyse the following extracted topic data:  Title: {{$json.title}}  Description: {{$json.desc}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2464,
+        -16
+      ],
+      "id": "8d1742d8-231c-4022-8940-372f8c6ab39b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2768,
+        208
+      ],
+      "id": "c365577b-9014-4f8d-a314-abbf40b6482e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "UO2QNANfJC33lSdd",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3040,
+        112
+      ],
+      "id": "6e950049-4495-4b6e-a1e3-7f19199f695e",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = {};\n\nfor (const item of $input.all()) {\n  Object.assign(result, item.json);\n}\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3264,
+        112
+      ],
+      "id": "6790edc3-921f-419a-80bd-8970449ba995",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MGpQS3aoWhpcwBlTbubq86WbI37JpHXGuEk9FFKMja0",
+          "mode": "list",
+          "cachedResultName": "new sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MGpQS3aoWhpcwBlTbubq86WbI37JpHXGuEk9FFKMja0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MGpQS3aoWhpcwBlTbubq86WbI37JpHXGuEk9FFKMja0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "des": "={{ $json.des }}",
+            "output": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "des",
+              "displayName": "des",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3472,
+        112
+      ],
+      "id": "12c7e9c8-c608-4ae3-b29c-45142bef1225",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TFNvPGknA6nRUXX4",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d450f010-f33e-47c6-a1ac-8d4a6c83a8f5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f3b12307b92d3273d1091e5180634d4fefd14377ec0ffb810b2025fef5946a9"
+  },
+  "id": "9HsBzGPwOa2UFzm4",
+  "tags": []
+}
