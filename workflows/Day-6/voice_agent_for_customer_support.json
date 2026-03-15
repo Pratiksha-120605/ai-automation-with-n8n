@@ -1,0 +1,193 @@
+{
+  "edges": {
+    "edge_start_to_qualifier": {
+      "source": "start_node",
+      "target": "qualifier_node",
+      "forward_condition": {
+        "type": "unconditional",
+        "label": null
+      },
+      "backward_condition": null
+    },
+    "edge_qualifier_to_technical": {
+      "source": "qualifier_node",
+      "target": "technical_support_node",
+      "forward_condition": {
+        "type": "llm",
+        "label": "Product Question",
+        "condition": "The user has general questions about Apple Product."
+      },
+      "backward_condition": null
+    },
+    "edge_qualifier_to_billing": {
+      "source": "qualifier_node",
+      "target": "billing_support_node",
+      "forward_condition": {
+        "type": "llm",
+        "label": "Stock questions",
+        "condition": "The user has a general question about what Apple products the store has in stock"
+      },
+      "backward_condition": null
+    },
+    "edge_technical_to_end": {
+      "source": "technical_support_node",
+      "target": "technical_end_node",
+      "forward_condition": {
+        "type": "llm",
+        "label": "End call condition",
+        "condition": "End call once the technical issue is resolved. Update this condition based on when the conversation should end."
+      },
+      "backward_condition": null
+    },
+    "edge_billing_to_end": {
+      "source": "billing_support_node",
+      "target": "billing_end_node",
+      "forward_condition": {
+        "type": "llm",
+        "label": "End call condition",
+        "condition": "End call once the billing issue is resolved. Update this condition based on when the conversation should end."
+      },
+      "backward_condition": null
+    }
+  },
+  "nodes": {
+    "start_node": {
+      "type": "start",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "edge_order": [
+        "edge_start_to_qualifier"
+      ]
+    },
+    "qualifier_node": {
+      "type": "override_agent",
+      "label": "Main Agent",
+      "position": {
+        "x": 0,
+        "y": 150
+      },
+      "edge_order": [
+        "edge_qualifier_to_technical",
+        "edge_qualifier_to_billing"
+      ],
+      "additional_prompt": "You are a customer support rep at store that sells apple products. You direct the user's questions appropriate.\n",
+      "additional_knowledge_base": [],
+      "additional_tool_ids": [],
+      "conversation_config": {
+        "agent": {
+          "prompt": {
+            "prompt": null,
+            "llm": null,
+            "built_in_tools": {},
+            "knowledge_base": []
+          }
+        },
+        "tts": {
+          "voice_id": "DLsHlh26Ugcm6ELvS0qi"
+        },
+        "turn": {
+          "turn_eagerness": null,
+          "spelling_patience": null,
+          "speculative_turn": false
+        }
+      }
+    },
+    "technical_support_node": {
+      "type": "override_agent",
+      "label": "Product Support",
+      "position": {
+        "x": -200,
+        "y": 300
+      },
+      "edge_order": [
+        "edge_technical_to_end"
+      ],
+      "additional_prompt": "",
+      "additional_knowledge_base": [
+        {
+          "type": "file",
+          "id": "Xux2hjc3kHwo9rIgdAaC",
+          "name": "Product information sheet",
+          "usage_mode": "auto"
+        }
+      ],
+      "additional_tool_ids": [],
+      "conversation_config": {
+        "agent": {
+          "prompt": {
+            "prompt": "You are able to answer general questions of apple product",
+            "llm": null,
+            "built_in_tools": {},
+            "knowledge_base": []
+          }
+        },
+        "tts": {
+          "voice_id": "ZauUyVXAz5znrgRuElJ5"
+        },
+        "turn": {
+          "turn_eagerness": null,
+          "spelling_patience": null,
+          "speculative_turn": false
+        }
+      }
+    },
+    "billing_support_node": {
+      "type": "override_agent",
+      "label": "Stock Specialist",
+      "position": {
+        "x": 200,
+        "y": 300
+      },
+      "edge_order": [
+        "edge_billing_to_end"
+      ],
+      "additional_prompt": "",
+      "additional_knowledge_base": [
+        {
+          "type": "text",
+          "id": "KdpA1yBVAyXZjhKBWf3O",
+          "name": "Stock",
+          "usage_mode": "auto"
+        }
+      ],
+      "additional_tool_ids": [],
+      "conversation_config": {
+        "agent": {
+          "prompt": {
+            "prompt": "You can answer the questions about product that are store in the stock",
+            "llm": null,
+            "built_in_tools": {},
+            "knowledge_base": []
+          }
+        },
+        "tts": {
+          "voice_id": "kHhWB9Fw3aF6ly7JvltC"
+        },
+        "turn": {
+          "turn_eagerness": null,
+          "spelling_patience": null,
+          "speculative_turn": false
+        }
+      }
+    },
+    "technical_end_node": {
+      "type": "end",
+      "position": {
+        "x": -200,
+        "y": 450
+      },
+      "edge_order": []
+    },
+    "billing_end_node": {
+      "type": "end",
+      "position": {
+        "x": 200,
+        "y": 450
+      },
+      "edge_order": []
+    }
+  },
+  "prevent_subagent_loops": false
+}
