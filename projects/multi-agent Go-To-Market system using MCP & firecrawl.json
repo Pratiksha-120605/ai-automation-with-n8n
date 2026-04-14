@@ -1,0 +1,164 @@
+{
+  "name": "multi-agent Go-To-Market system using MCP & firecrawl",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "abb1700d-3d83-414e-a4bb-a6848fe05640",
+      "name": "When chat message received",
+      "webhookId": "a6e265ea-e677-43ab-9ff7-6aab2dd09eaa"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You find sales prospects based on a specific query from the user. You use the tools to search the internet and scrap the websites as necessary to find the best potential clients for the user and respond with 2 sales prospects ",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3b3204ce-3cb7-4be9-879f-5fd92925dca6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        64,
+        208
+      ],
+      "id": "e16bc18e-a40f-4250-bff6-7025806a17d2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "HEIr2tQDtHCBBovq",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        208
+      ],
+      "id": "ef5078e5-18a0-45cc-b911-ac3a89ecabd5",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"prospects\" : [\n      {\n        \"firstname\" : \"the prospects first name here\",\n        \"lastname\" : \"the prospect's last name here\",\n        \"company\" : \"where they work\",\n        \"role\":\"what they do\",\n        \"email\": \"predicted email address for this prospect\",\n        \"rationale\":\"why this prospect qualified as a potential client\"\n      }\n    ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        208
+      ],
+      "id": "f9261baf-9dec-4335-85ad-d08947c39cca",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "=https://mcp.firecrawl.dev/{{$vars.FIRECRAWL_API_KEY}}/v2/mcp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        215
+      ],
+      "id": "29d9ee81-7353-4847-8d1e-433f8f1f6c13",
+      "name": "MCP Client"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d8064d1f-c5a8-41fc-8a62-929597b2ee51",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "96499cec02bf3cc2736960c9081af4aa7e06de1735062904fdf9665f362ccb72"
+  },
+  "id": "VfyRhImGYEjRVsw8",
+  "tags": []
+}
