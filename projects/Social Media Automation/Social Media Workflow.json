@@ -1,0 +1,256 @@
+{
+  "name": "Social Media Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "435f9fe2-0411-4664-baf0-a630ab0cbae5",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1h26irlUssann_8Zqah9TvkwE9MvrjezisgMU9Z3CsAo/edit?tab=t.0"
+      },
+      "id": "a495e23c-95f7-4f87-b50c-06730890befc",
+      "name": "Get a document",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -64
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "oQ4HMxirc0fvlodm",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a LinkedIn content strategist.\n\nBelow is SOURCE CONTENT. Use ONLY this source content. Do not use the instructions themselves as source material. Do not invent facts.\n\nSOURCE CONTENT:\n{{ $json.content }}\n\nGenerate exactly 3 LinkedIn post ideas.\n\nFor each idea provide:\n\n<topic1>\nA specific LinkedIn post topic based directly on the source content.\n\n<research1>\nSpecify exactly which facts, examples, statistics, sources, arguments, or sections from the source content should be used to write the post.\n\n<topic2>\n...\n\n<research2>\n...\n\n<topic3>\n...\n\n<research3>\n...\n\nRules:\n- Generate exactly 3 ideas.\n- Each idea must be substantially different.\n- Use only information contained in SOURCE CONTENT.\n- Do not create generic topics unrelated to the source.\n- Research references must point to specific information in the source.\n- Do not write the actual LinkedIn posts yet.\n- Do not add explanations before or after the 3 ideas.\n- Do not output JSON.\nImportant\nYour input contains a huge amount of text. That's fine.\n\nThe key is this:\n\nSOURCE CONTENT:\n{{ $json.content }}\nnot:\n\ncontent: [object Object]\nand not:\n\n{{ $json }}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "b4651bde-e380-41c3-bf07-5b179f945b54",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        -64
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a helpful assistant who generates LinkedIn posts.\n\nBelow are 3 LinkedIn post ideas with their research instructions.\n\n{{ $json.content.parts[0].text }}\n\nFor each of the 3 ideas:\n\n1. Create exactly one LinkedIn post.\n2. Keep it concise and easy to read.\n3. Start with a strong hook.\n4. Stay strictly based on the provided research.\n5. Do not introduce unrelated information.\n6. Add relevant hashtags at the bottom.\n7. Extract the Topic and Reference from each idea.\n8. Add exactly 3 rows to the connected Google Sheet.\n9. Use the Google Sheets tool to append one row for each post. Call the tool once per post, one call at a time: wait for each call's result before making the next call. Never make multiple tool calls in parallel.\n10. The Google Sheet has these columns:\n   - Title (the topic)\n   - Reference\n   - Post\n\nYou must create exactly 3 Google Sheets rows:\n- One row for Topic 1\n- One row for Topic 2\n- One row for Topic 3\n\nDo not invent information that is not present in the provided research.\nDo not skip the Google Sheets tool.\nDo not merely describe what should be added to the sheet; actually use the Google Sheets tool to append the rows.\n\nAfter all 3 rows have been successfully added, provide a brief confirmation.",
+        "options": {
+          "systemMessage": "You are a helpful assistant that writes LinkedIn posts and saves them to Google Sheets. When using tools, make exactly one tool call per turn and wait for its result before making the next call. Never issue parallel tool calls."
+        }
+      },
+      "id": "7c859a6a-51af-4557-97ac-c693e6f2eb73",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        800,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "id": "77f67e34-7e2b-4447-88bb-8082cf36ed26",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        160
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yXL1FTpez9ELSvx7jIViXnOPD9mWZlmWEvvgFXYqIlY",
+          "mode": "list",
+          "cachedResultName": "Content Ideas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yXL1FTpez9ELSvx7jIViXnOPD9mWZlmWEvvgFXYqIlY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yXL1FTpez9ELSvx7jIViXnOPD9mWZlmWEvvgFXYqIlY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+            "Reference": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reference', ``, 'string') }}",
+            "Post": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Post', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reference",
+              "displayName": "Reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Post",
+              "displayName": "Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6edc4a1f-9b92-4e6a-8b81-f230fd844bf7",
+      "name": "Append row in sheet in Google Sheets",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KSYkif3a7bRU96ah",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "688b27bc-49bd-4c56-89bd-36abca997825",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bfc3b0c17ae4019f333be284c024e224230ff420f488247129020a7876052e22"
+  },
+  "nodeGroups": [],
+  "id": "fYeA0HaFdCOkmU0z",
+  "tags": []
+}
